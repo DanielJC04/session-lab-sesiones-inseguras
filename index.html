@@ -206,11 +206,12 @@
         options: [
           "Colocarlo como parámetro en la dirección URL.",
           "Enviar el identificador en una cookie mediante una conexión HTTPS.",
-          "Usar un identificador corto y fácil de recordar."
+          "Usar un identificador corto y fácil de recordar.",
+          "Transmitirlo en texto plano mediante HTTP para inspeccionar el tráfico."
         ],
         correct: 1,
         good: "Correcto. HTTPS protege la comunicación frente a la lectura o modificación del tráfico durante el transporte.",
-        bad: "Un identificador en la URL puede quedar expuesto en el historial, registros o cabeceras de referencia. Un valor predecible también facilita que se adivine.",
+        bad: "Un identificador en la URL puede quedar expuesto en el historial, registros o cabeceras de referencia. Un valor predecible facilita que se adivine, y HTTP no cifra el tráfico.",
         attack: "SIMULACIÓN: el identificador de prueba aparece expuesto y el atacante podría intentar reutilizarlo.",
         safe: "DEFENSA: el identificador viaja en una cookie a través de una conexión cifrada."
       },
@@ -221,11 +222,12 @@
         options: [
           "Activar HttpOnly, Secure y una política SameSite adecuada.",
           "Desactivar HttpOnly para que cualquier script pueda leer la cookie.",
-          "No configurar atributos y confiar en que el usuario no comparta el enlace."
+          "No configurar atributos y confiar en que el usuario no comparta el enlace.",
+          "Guardar el identificador en localStorage para que los scripts lo reutilicen."
         ],
         correct: 0,
         good: "Correcto. HttpOnly limita el acceso desde JavaScript, Secure restringe el envío a HTTPS y SameSite ayuda a reducir ciertos ataques CSRF.",
-        bad: "Sin estos atributos, la cookie queda más expuesta. Por ejemplo, si un atacante consigue ejecutar JavaScript malicioso en el sitio, podría intentar leer una cookie sin HttpOnly.",
+        bad: "Sin estos atributos, la cookie queda más expuesta. JavaScript malicioso también puede leer valores de localStorage, mientras que HttpOnly impide que JavaScript lea la cookie.",
         attack: "SIMULACIÓN: una cookie mal configurada deja una oportunidad para que el identificador sea expuesto.",
         safe: "DEFENSA: la cookie cuenta con atributos que reducen su exposición y uso indebido."
       },
@@ -236,11 +238,12 @@
         options: [
           "Conservar exactamente el mismo identificador que existía antes de iniciar sesión.",
           "Mostrar el identificador en pantalla para que el usuario lo guarde.",
-          "Generar un nuevo identificador de sesión después de autenticar al usuario."
+          "Generar un nuevo identificador de sesión después de autenticar al usuario.",
+          "Usar un identificador fijo compartido por todos los usuarios."
         ],
         correct: 2,
         good: "Correcto. Renovar el identificador al cambiar el estado de autenticación ayuda a prevenir la fijación de sesión (session fixation).",
-        bad: "Si el identificador previo se mantiene después del inicio de sesión, un atacante que lo conociera podría intentar aprovecharlo para fijar o reutilizar la sesión.",
+        bad: "Un identificador previo o compartido puede ser conocido y reutilizado por otra persona. Renueva el identificador al autenticar al usuario.",
         attack: "SIMULACIÓN: el identificador previo continúa activo tras el inicio de sesión; existe riesgo de fijación de sesión.",
         safe: "DEFENSA: se renueva el identificador y el valor anterior deja de ser válido."
       },
@@ -251,7 +254,8 @@
         options: [
           "Redirigir al inicio y dejar la sesión activa en el servidor.",
           "Invalidar la sesión en el servidor y eliminar o expirar la cookie del navegador.",
-          "Cerrar la pestaña y asumir que la sesión desapareció."
+          "Cerrar la pestaña y asumir que la sesión desapareció.",
+          "Borrar la cookie del navegador, pero dejar vigente la sesión del servidor."
         ],
         correct: 1,
         good: "Correcto. El servidor debe invalidar la sesión; borrar la cookie del navegador por sí solo no garantiza que el identificador deje de funcionar.",
@@ -266,7 +270,8 @@
         options: [
           "Mantenerla activa indefinidamente para evitar que el usuario vuelva a entrar.",
           "No aplicar vencimiento mientras el navegador siga abierto.",
-          "Definir un tiempo de inactividad y límites de duración acordes con el riesgo de la aplicación."
+          "Definir un tiempo de inactividad y límites de duración acordes con el riesgo de la aplicación.",
+          "Expirarla solo cuando se cierre el navegador, sin límite de inactividad."
         ],
         correct: 2,
         good: "Correcto. La expiración por inactividad y los límites de duración reducen el tiempo durante el cual una sesión abandonada puede ser utilizada.",
@@ -281,7 +286,8 @@
         options: [
           "Mantener el mismo identificador para no interrumpir la sesión.",
           "Generar un identificador nuevo y revocar el anterior.",
-          "Añadir el identificador de sesión a la URL para renovarlo fácilmente."
+          "Añadir el identificador de sesión a la URL para renovarlo fácilmente.",
+          "Conservar vigente el identificador anterior hasta su expiración."
         ],
         correct: 1,
         good: "Correcto. Rotar el identificador al cambiar privilegios evita que un valor previo se reutilice para acceder al estado autenticado.",
@@ -562,7 +568,7 @@
       if (fiftyUsed || answered) return;
       fiftyUsed = true;
       const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== scenarios[current].correct);
-      wrongButtons.slice(0, 1).forEach(button => {
+      wrongButtons.slice(0, 2).forEach(button => {
         button.hidden = true;
         button.setAttribute('aria-hidden', 'true');
       });

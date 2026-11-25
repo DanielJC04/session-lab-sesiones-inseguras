@@ -1,12 +1,13 @@
 # Session Lab
 
-Minijuego educativo sobre secuestro de sesión web. Incluye seis preguntas,
-tres vidas, puntuación, los comodines 50/50 y escudo (un uso por partida), y un
-temporizador de 15 segundos por pregunta. El tiempo agotado resta una vida y
-avanza solo; el escudo activado antes de responder protege de una respuesta
-incorrecta sin sumar puntos ni restar vidas, y avanza a la siguiente pregunta.
-Se ejecuta
-directamente en el navegador; no necesita dependencias ni compilación.
+Minijuego educativo sobre secuestro de sesión web. Incluye seis preguntas con
+cuatro opciones (A-D), tres vidas, puntuación, y los comodines 50/50 y escudo
+(un uso por partida). El 50/50 elimina dos opciones incorrectas y deja dos
+respuestas posibles. Cada pregunta tiene 15 segundos; si se acaba el tiempo,
+se pierde una vida y avanza automáticamente. El escudo activado antes de
+responder protege de un error sin sumar puntos ni restar vidas, y avanza a la
+siguiente pregunta.
+El juego corre en el navegador y no necesita dependencias ni compilación.
 
 ## Ejecutar localmente
 
