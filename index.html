@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d18">
+  <title>Session Lab | Minijuego de seguridad</title>
+  <style>
+    :root {
+      --bg: #080d18;
+      --panel: #111b2b;
+      --panel-2: #152238;
+      --line: #263850;
+      --text: #edf4ff;
+      --muted: #a6b5ca;
+      --cyan: #42d7e8;
+      --green: #48d597;
+      --red: #ff687d;
+      --yellow: #f4c96b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: radial-gradient(circle at 15% 0%, #142a42 0, transparent 32%),
+                  radial-gradient(circle at 100% 100%, #102b32 0, transparent 30%), var(--bg);
+      font-family: Segoe UI, Arial, sans-serif;
+      line-height: 1.5;
+    }
+    .page { width: min(900px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 42px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 34px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .08em; }
+    .brand-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #2c7180; border-radius: 11px; color: var(--cyan); background: #102a38; font-size: 20px; }
+    .brand small { display: block; color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .18em; }
+    .tag { border: 1px solid #265b64; border-radius: 999px; padding: 6px 11px; color: #8cebf0; font-size: 11px; font-weight: 700; letter-spacing: .09em; }
+    .hero { margin-bottom: 22px; }
+    .eyebrow { color: var(--cyan); font-size: 11px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 8px 0 10px; font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -.04em; }
+    .subtitle { max-width: 680px; margin: 0; color: var(--muted); font-size: 15px; }
+    .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg, rgba(21,34,56,.97), rgba(13,22,37,.98)); box-shadow: 0 22px 65px rgba(0,0,0,.28); }
+    .welcome { padding: clamp(22px, 5vw, 38px); }
+    .welcome-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 26px; align-items: center; }
+    h2 { margin: 0 0 10px; font-size: 22px; }
+    .welcome p { color: var(--muted); margin: 0 0 18px; }
+    .mission { padding: 18px; border: 1px solid #2c465e; border-radius: 14px; background: #0d1928; }
+    .mission strong { display: block; margin-bottom: 8px; color: var(--cyan); font-size: 12px; letter-spacing: .12em; }
+    .mission span { color: var(--muted); font-size: 13px; }
+    .facts { display: flex; gap: 18px; flex-wrap: wrap; margin: 19px 0 22px; color: var(--muted); font-size: 12px; }
+    .facts span::before { content: "✓"; margin-right: 7px; color: var(--green); font-weight: 900; }
+    button { font: inherit; cursor: pointer; }
+    .primary { border: 0; border-radius: 10px; padding: 12px 19px; color: #041319; background: var(--cyan); font-weight: 800; transition: transform .15s, filter .15s; }
+    .primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .primary:focus-visible, .option:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .game { padding: clamp(19px, 4vw, 30px); }
+    .game-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 15px; }
+    .step { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+    .score-chip { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .track { height: 7px; overflow: hidden; margin-bottom: 25px; border-radius: 10px; background: #253449; }
+    .track-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width .25s; }
+    .scenario-label { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+    .question { margin: 0 0 9px; font-size: clamp(22px, 4vw, 29px); letter-spacing: -.025em; }
+    .context { margin: 0 0 22px; color: var(--muted); }
+    .options { display: grid; gap: 10px; }
+    .option { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 14px; border: 1px solid #30445e; border-radius: 12px; color: var(--text); background: #101d30; text-align: left; transition: border-color .15s, background .15s; }
+    .option:hover:not(:disabled) { border-color: var(--cyan); background: #142940; }
+    .option:disabled { cursor: default; opacity: .92; }
+    .option-letter { display: grid; flex: 0 0 27px; place-items: center; width: 27px; height: 27px; border-radius: 8px; color: var(--cyan); background: #1b344a; font-size: 12px; font-weight: 900; }
+    .option.correct { border-color: var(--green); background: rgba(35,129,95,.13); }
+    .option.correct .option-letter { color: #06180f; background: var(--green); }
+    .option.wrong { border-color: var(--red); background: rgba(155,46,65,.15); }
+    .option.wrong .option-letter { color: white; background: #a63850; }
+    .feedback { display: none; margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #0d1928; }
+    .feedback.show { display: block; }
+    .feedback h3 { margin: 0 0 5px; font-size: 15px; }
+    .feedback p { margin: 0; color: var(--muted); font-size: 14px; }
+    .feedback.good { border-color: #28785b; }
+    .feedback.good h3 { color: var(--green); }
+    .feedback.bad { border-color: #8b3c4c; }
+    .feedback.bad h3 { color: var(--red); }
+    .simulation { margin-top: 12px; padding: 10px 12px; border-radius: 8px; color: #f3c2c9; background: rgba(255,104,125,.08); font-size: 12px; }
+    .simulation.safe { color: #a8edce; background: rgba(72,213,151,.08); }
+    .game-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
+    .result { padding: clamp(22px, 5vw, 36px); }
+    .result-score { margin: 8px 0 5px; font-size: 52px; font-weight: 900; letter-spacing: -.06em; }
+    .result-score span { color: var(--cyan); font-size: 20px; letter-spacing: 0; }
+    .result-description { max-width: 650px; color: var(--muted); }
+    .result-list { display: grid; gap: 9px; margin: 24px 0; }
+    .result-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: #0f1b2c; font-size: 13px; }
+    .status { white-space: nowrap; font-size: 11px; font-weight: 800; }
+    .status.ok { color: var(--green); }
+    .status.fail { color: var(--red); }
+    .notice { margin-top: 18px; padding: 12px 14px; border-left: 3px solid var(--yellow); color: var(--muted); background: rgba(244,201,107,.06); font-size: 12px; }
+    footer { margin-top: 22px; color: #71839b; font-size: 11px; text-align: center; }
+    [hidden] { display: none !important; }
+    @media (max-width: 650px) {
+      .welcome-grid { grid-template-columns: 1fr; }
+      header { margin-bottom: 25px; }
+      .tag { font-size: 9px; }
+      .result-row { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="brand"><div class="brand-icon">⌁</div><div>SESSION LAB<small>CYBERSECURITY TRAINING</small></div></div>
+      <div class="tag">SIMULACIÓN EDUCATIVA</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Desafío de seguridad web</div>
+      <h1>Operación: Session Hijacking</h1>
+      <p class="subtitle">Toma decisiones para proteger una sesión web. Cada elección puede detener al atacante o dejar una oportunidad para el secuestro de sesión.</p>
+    </section>
+
+    <section class="panel welcome" id="welcomeScreen">
+      <div class="welcome-grid">
+        <div>
+          <h2>Tu misión comienza aquí</h2>
+          <p>Una aplicación de prueba presenta varios riesgos en la gestión de sesiones. Tu objetivo es elegir la medida más segura en cada situación.</p>
+          <div class="facts"><span>5 decisiones</span><span>Opciones predeterminadas</span><span>Resultado al finalizar</span></div>
+          <button class="primary" id="startButton">Iniciar simulación →</button>
+        </div>
+        <div class="mission"><strong>OBJETIVO</strong><span>Evitar que un atacante consiga o reutilice el identificador de sesión de un usuario.</span></div>
+      </div>
+    </section>
+
+    <section class="panel game" id="gameScreen" hidden>
+      <div class="game-top"><div class="step" id="stepLabel">DECISIÓN 1 DE 5</div><div class="score-chip" id="scoreLabel">Puntos: 0 / 10</div></div>
+      <div class="track"><div class="track-fill" id="progressFill"></div></div>
+      <div class="scenario-label" id="scenarioLabel">ESCENARIO 01</div>
+      <h2 class="question" id="questionText"></h2>
+      <p class="context" id="contextText"></p>
+      <div class="options" id="optionsContainer"></div>
+      <div class="feedback" id="feedbackBox" aria-live="polite">
+        <h3 id="feedbackTitle"></h3>
+        <p id="feedbackText"></p>
+        <div class="simulation" id="simulationText"></div>
+      </div>
+      <div class="game-actions"><button class="primary" id="nextButton" hidden>Continuar →</button></div>
+    </section>
+
+    <section class="panel result" id="resultScreen" hidden>
+      <div class="eyebrow">Informe de la misión</div>
+      <h2 id="resultTitle">Resultado</h2>
+      <div class="result-score" id="finalScore">0 <span>/ 10 puntos</span></div>
+      <p class="result-description" id="resultDescription"></p>
+      <div class="result-list" id="resultList"></div>
+      <div class="notice">Esta actividad es una simulación local. Los identificadores y eventos son ficticios: no se capturan cookies ni se intervienen sesiones reales.</div>
+      <div style="margin-top:22px"><button class="primary" id="restartButton">Volver a jugar ↻</button></div>
+    </section>
+
+    <footer>SESSION LAB · Práctica académica sobre gestión segura de sesiones</footer>
+  </main>
+
+  <script>
+    const scenarios = [
+      {
+        label: "Transmisión del identificador",
+        question: "¿Cómo debería viajar el identificador de sesión?",
+        context: "El usuario inicia sesión en el portal. Debes decidir dónde y cómo transportar el identificador que mantiene su sesión activa.",
+        options: [
+          "Colocarlo como parámetro en la dirección URL.",
+          "Enviar el identificador en una cookie mediante una conexión HTTPS.",
+          "Usar un identificador corto y fácil de recordar."
+        ],
+        correct: 1,
+        good: "Correcto. HTTPS protege la comunicación frente a la lectura o modificación del tráfico durante el transporte.",
+        bad: "Un identificador en la URL puede quedar expuesto en el historial, registros o cabeceras de referencia. Un valor predecible también facilita que se adivine.",
+        attack: "SIMULACIÓN: el identificador de prueba aparece expuesto y el atacante podría intentar reutilizarlo.",
+        safe: "DEFENSA: el identificador viaja en una cookie a través de una conexión cifrada."
+      },
+      {
+        label: "Protección de la cookie",
+        question: "¿Qué configuración reduce el riesgo de robo de la cookie?",
+        context: "La aplicación ya utiliza cookies. Ahora debes configurar sus atributos de seguridad.",
+        options: [
+          "Activar HttpOnly, Secure y una política SameSite adecuada.",
+          "Desactivar HttpOnly para que cualquier script pueda leer la cookie.",
+          "No configurar atributos y confiar en que el usuario no comparta el enlace."
+        ],
+        correct: 0,
+        good: "Correcto. HttpOnly limita el acceso desde JavaScript, Secure restringe el envío a HTTPS y SameSite ayuda a reducir ciertos ataques CSRF.",
+        bad: "Sin estos atributos, la cookie queda más expuesta. Por ejemplo, si un atacante consigue ejecutar JavaScript malicioso en el sitio, podría intentar leer una cookie sin HttpOnly.",
+        attack: "SIMULACIÓN: una cookie mal configurada deja una oportunidad para que el identificador sea expuesto.",
+        safe: "DEFENSA: la cookie cuenta con atributos que reducen su exposición y uso indebido."
+      },
+      {
+        label: "Inicio de sesión",
+        question: "¿Qué debe hacer el servidor después de autenticar al usuario?",
+        context: "El usuario acaba de introducir correctamente sus credenciales. La aplicación debe establecer una sesión autenticada.",
+        options: [
+          "Conservar exactamente el mismo identificador que existía antes de iniciar sesión.",
+          "Mostrar el identificador en pantalla para que el usuario lo guarde.",
+          "Generar un nuevo identificador de sesión después de autenticar al usuario."
+        ],
+        correct: 2,
+        good: "Correcto. Renovar el identificador al cambiar el estado de autenticación ayuda a prevenir la fijación de sesión (session fixation).",
+        bad: "Si el identificador previo se mantiene después del inicio de sesión, un atacante que lo conociera podría intentar aprovecharlo para fijar o reutilizar la sesión.",
+        attack: "SIMULACIÓN: el identificador previo continúa activo tras el inicio de sesión; existe riesgo de fijación de sesión.",
+        safe: "DEFENSA: se renueva el identificador y el valor anterior deja de ser válido."
+      },
+      {
+        label: "Cierre de sesión",
+        question: "¿Cuál es la forma correcta de cerrar la sesión?",
+        context: "El usuario pulsa el botón 'Cerrar sesión' en un computador compartido.",
+        options: [
+          "Redirigir al inicio y dejar la sesión activa en el servidor.",
+          "Invalidar la sesión en el servidor y eliminar o expirar la cookie del navegador.",
+          "Cerrar la pestaña y asumir que la sesión desapareció."
+        ],
+        correct: 1,
+        good: "Correcto. El servidor debe invalidar la sesión; borrar la cookie del navegador por sí solo no garantiza que el identificador deje de funcionar.",
+        bad: "Si la sesión sigue activa en el servidor, alguien que conserve el identificador podría intentar usarla aunque el usuario ya haya salido de la pantalla.",
+        attack: "SIMULACIÓN: la sesión sigue activa después de salir de la página. Un identificador conocido aún podría ser reutilizado.",
+        safe: "DEFENSA: el servidor invalida la sesión y el navegador elimina la cookie asociada."
+      },
+      {
+        label: "Tiempo de expiración",
+        question: "¿Qué política conviene aplicar a una sesión inactiva?",
+        context: "El usuario deja el computador sin cerrar sesión. Debes decidir cuánto tiempo puede permanecer válida la sesión.",
+        options: [
+          "Mantenerla activa indefinidamente para evitar que el usuario vuelva a entrar.",
+          "No aplicar vencimiento mientras el navegador siga abierto.",
+          "Definir un tiempo de inactividad y límites de duración acordes con el riesgo de la aplicación."
+        ],
+        correct: 2,
+        good: "Correcto. La expiración por inactividad y los límites de duración reducen el tiempo durante el cual una sesión abandonada puede ser utilizada.",
+        bad: "Una sesión que nunca vence puede seguir siendo útil para un atacante durante mucho tiempo si el identificador queda expuesto.",
+        attack: "SIMULACIÓN: una sesión abandonada permanece activa y amplía la oportunidad de reutilización.",
+        safe: "DEFENSA: la sesión expira según una política definida para el nivel de riesgo de la aplicación."
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answers = [];
+
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const nextButton = document.getElementById('nextButton');
+
+    function startGame() {
+      current = 0;
+      score = 0;
+      answers = [];
+      welcomeScreen.hidden = true;
+      resultScreen.hidden = true;
+      gameScreen.hidden = false;
+      renderScenario();
+    }
+
+    function renderScenario() {
+      const item = scenarios[current];
+      document.getElementById('stepLabel').textContent = `DECISIÓN ${current + 1} DE ${scenarios.length}`;
+      document.getElementById('scoreLabel').textContent = `Puntos: ${score} / 10`;
+      document.getElementById('progressFill').style.width = `${(current / scenarios.length) * 100}%`;
+      document.getElementById('scenarioLabel').textContent = `ESCENARIO 0${current + 1} · ${item.label}`;
+      document.getElementById('questionText').textContent = item.question;
+      document.getElementById('contextText').textContent = item.context;
+      optionsContainer.innerHTML = '';
+      feedbackBox.className = 'feedback';
+      nextButton.hidden = true;
+      nextButton.textContent = current === scenarios.length - 1 ? 'Ver resultado →' : 'Continuar →';
+
+      item.options.forEach((optionText, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'option';
+        const letter = document.createElement('span');
+        letter.className = 'option-letter';
+        letter.textContent = String.fromCharCode(65 + index);
+        const text = document.createElement('span');
+        text.textContent = optionText;
+        button.append(letter, text);
+        button.addEventListener('click', () => chooseOption(index));
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function chooseOption(selected) {
+      const item = scenarios[current];
+      const correct = selected === item.correct;
+      if (correct) score += 2;
+      answers.push({ selected, correct, label: item.label });
+
+      Array.from(optionsContainer.children).forEach((button, index) => {
+        button.disabled = true;
+        if (index === item.correct) button.classList.add('correct');
+        if (index === selected && !correct) button.classList.add('wrong');
+      });
+
+      feedbackBox.className = `feedback show ${correct ? 'good' : 'bad'}`;
+      document.getElementById('feedbackTitle').textContent = correct ? '✓ Decisión segura' : '✕ Riesgo detectado';
+      document.getElementById('feedbackText').textContent = correct ? item.good : item.bad;
+      const simulation = document.getElementById('simulationText');
+      simulation.textContent = correct ? item.safe : item.attack;
+      simulation.className = `simulation ${correct ? 'safe' : ''}`;
+      document.getElementById('scoreLabel').textContent = `Puntos: ${score} / 10`;
+      nextButton.hidden = false;
+    }
+
+    function showResults() {
+      gameScreen.hidden = true;
+      resultScreen.hidden = false;
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('finalScore').innerHTML = `${score} <span>/ 10 puntos</span>`;
+      let title;
+      let description;
+      if (score >= 8) {
+        title = '¡Misión protegida!';
+        description = 'Tomaste decisiones que reducen los principales riesgos de gestión de sesiones. La aplicación queda mejor protegida frente a intentos de secuestro de sesión.';
+      } else if (score >= 4) {
+        title = 'Protección parcial';
+        description = 'Aplicaste algunas medidas correctas, pero todavía quedan debilidades que podrían facilitar la exposición o reutilización de una sesión.';
+      } else {
+        title = 'Sesión comprometida';
+        description = 'Varias decisiones dejaron oportunidades para el atacante. Repasa las medidas de protección e inténtalo de nuevo.';
+      }
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultDescription').textContent = description;
+
+      const list = document.getElementById('resultList');
+      list.innerHTML = '';
+      answers.forEach((answer, index) => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const name = document.createElement('span');
+        name.textContent = `${index + 1}. ${answer.label}`;
+        const status = document.createElement('strong');
+        status.className = `status ${answer.correct ? 'ok' : 'fail'}`;
+        status.textContent = answer.correct ? '+2 · CORRECTO' : '0 · RIESGO';
+        row.append(name, status);
+        list.appendChild(row);
+      });
+    }
+
+    document.getElementById('startButton').addEventListener('click', startGame);
+    nextButton.addEventListener('click', () => {
+      current += 1;
+      if (current < scenarios.length) renderScenario();
+      else showResults();
+    });
+    document.getElementById('restartButton').addEventListener('click', startGame);
+  </script>
+</body>
+</html>
