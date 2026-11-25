@@ -1,7 +1,8 @@
 # Session Lab
 
-Minijuego educativo sobre secuestro de sesión web. Incluye cinco escenarios
-interactivos, retroalimentación por respuesta y puntuación final. Se ejecuta
+Minijuego educativo sobre secuestro de sesión web. Incluye cinco niveles,
+tres vidas, puntuación, un comodín 50/50 y una llamada simulada a Luna, un
+agente que ofrece pistas preparadas para cada pregunta. Se ejecuta
 directamente en el navegador; no necesita dependencias ni compilación.
 
 ## Ejecutar localmente
@@ -17,6 +18,7 @@ automáticamente después de confirmar el servicio.
 
 ## Uso de IA generativa
 
-Se utilizó IA generativa como apoyo para revisar el proyecto y preparar su
-publicación como sitio estático en Render. El contenido y el código del juego
-original se conservaron.
+Se utilizó IA generativa como apoyo para diseñar e implementar las mecánicas
+del concurso, revisar el contenido y preparar la publicación en Render. Luna
+es un personaje con pistas escritas previamente: no es una IA conectada ni
+realiza llamadas reales.

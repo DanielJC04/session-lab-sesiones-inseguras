@@ -51,13 +51,34 @@
     button { font: inherit; cursor: pointer; }
     .primary { border: 0; border-radius: 10px; padding: 12px 19px; color: #041319; background: var(--cyan); font-weight: 800; transition: transform .15s, filter .15s; }
     .primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .primary:focus-visible, .option:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .primary:focus-visible, .secondary:focus-visible, .option:focus-visible { outline: 3px solid white; outline-offset: 3px; }
     .game { padding: clamp(19px, 4vw, 30px); }
     .game-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 15px; }
     .step { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+    .prize-label { margin-top: 4px; color: var(--yellow); font-size: 13px; font-weight: 700; }
+    .status-group { display: flex; align-items: center; gap: 9px; }
     .score-chip { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .lives { display: flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #633747; border-radius: 999px; color: #ff8291; font-size: 13px; font-weight: 800; }
+    .hearts { letter-spacing: 2px; }
     .track { height: 7px; overflow: hidden; margin-bottom: 25px; border-radius: 10px; background: #253449; }
     .track-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width .25s; }
+    .prize-ladder { display: flex; gap: 7px; overflow-x: auto; margin: -7px 0 22px; padding: 2px 0 7px; scrollbar-color: #30445e transparent; }
+    .prize-step { flex: 1 0 auto; padding: 6px 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: #0d1928; font-size: 11px; text-align: center; }
+    .prize-step.active { border-color: var(--yellow); color: var(--yellow); background: rgba(244,201,107,.08); }
+    .prize-step.cleared { border-color: #28785b; color: var(--green); }
+    .game-tools { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 20px; }
+    .secondary { border: 1px solid #35516c; border-radius: 10px; padding: 9px 13px; color: var(--text); background: #14243a; font-weight: 700; transition: border-color .15s, background .15s; }
+    .secondary:hover:not(:disabled) { border-color: var(--cyan); background: #1a304a; }
+    .secondary:disabled { cursor: default; opacity: .48; }
+    .agent-call { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; padding: 14px; border: 1px solid #39777d; border-radius: 14px; background: linear-gradient(110deg, #102d39, #102137); }
+    .agent-avatar { display: grid; flex: 0 0 54px; place-items: center; width: 54px; height: 54px; border: 2px solid #54dce3; border-radius: 50%; background: #173a4a; font-size: 30px; animation: agent-pulse 1.8s ease-in-out infinite; }
+    .agent-copy { flex: 1; min-width: 0; }
+    .agent-copy small { color: var(--cyan); font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+    .agent-copy h3 { margin: 2px 0 3px; font-size: 15px; }
+    .agent-copy p { margin: 0; color: var(--muted); font-size: 13px; }
+    .hangup { flex: 0 0 auto; width: 36px; height: 36px; border: 1px solid #8b3c4c; border-radius: 50%; color: white; background: #682b3b; font-size: 17px; }
+    @keyframes agent-pulse { 50% { box-shadow: 0 0 0 6px rgba(66,215,232,.12); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
     .scenario-label { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
     .question { margin: 0 0 9px; font-size: clamp(22px, 4vw, 29px); letter-spacing: -.025em; }
     .context { margin: 0 0 22px; color: var(--muted); }
@@ -98,6 +119,13 @@
       header { margin-bottom: 25px; }
       .tag { font-size: 9px; }
       .result-row { align-items: flex-start; }
+      .game-top { align-items: flex-start; }
+      .status-group { flex-direction: column; align-items: flex-end; gap: 6px; }
+      .game-tools { display: grid; grid-template-columns: 1fr 1fr; }
+      .secondary { padding: 9px 8px; font-size: 12px; }
+      .agent-call { align-items: flex-start; gap: 10px; }
+      .agent-avatar { flex-basis: 44px; width: 44px; height: 44px; font-size: 25px; }
+      .hangup { width: 32px; height: 32px; }
     }
   </style>
 </head>
@@ -117,18 +145,36 @@
     <section class="panel welcome" id="welcomeScreen">
       <div class="welcome-grid">
         <div>
-          <h2>Tu misión comienza aquí</h2>
-          <p>Una aplicación de prueba presenta varios riesgos en la gestión de sesiones. Tu objetivo es elegir la medida más segura en cada situación.</p>
-          <div class="facts"><span>5 decisiones</span><span>Opciones predeterminadas</span><span>Resultado al finalizar</span></div>
-          <button class="primary" id="startButton">Iniciar simulación →</button>
+          <h2>¿Listo para ser experto en sesiones?</h2>
+          <p>Responde cinco preguntas al estilo concurso y protege la sesión. Cada error cuesta una vida: usa tus comodines con estrategia.</p>
+          <div class="facts"><span>5 niveles de premio</span><span>3 vidas</span><span>Comodines 50/50 y llamada</span></div>
+          <button class="primary" id="startButton">Jugar por el premio →</button>
         </div>
-        <div class="mission"><strong>OBJETIVO</strong><span>Evitar que un atacante consiga o reutilice el identificador de sesión de un usuario.</span></div>
+        <div class="mission"><strong>TU EQUIPO</strong><span>Deja solo dos respuestas posibles con el 50/50 o llama a Luna, tu agente virtual, para recibir una pista. Cada comodín se usa una vez por partida; la llamada es una simulación dentro del juego.</span></div>
       </div>
     </section>
 
     <section class="panel game" id="gameScreen" hidden>
-      <div class="game-top"><div class="step" id="stepLabel">DECISIÓN 1 DE 5</div><div class="score-chip" id="scoreLabel">Puntos: 0 / 10</div></div>
+      <div class="game-top">
+        <div><div class="step" id="stepLabel">NIVEL 1 DE 5</div><div class="prize-label" id="prizeLabel">Premio: 100 XP</div></div>
+        <div class="status-group">
+          <div class="score-chip" id="scoreLabel">Puntos: 0 / 10</div>
+          <div class="lives" id="livesDisplay" aria-label="Vidas restantes"><span class="hearts" id="heartsDisplay">♥ ♥ ♥</span><span id="livesCount">3</span></div>
+        </div>
+      </div>
       <div class="track"><div class="track-fill" id="progressFill"></div></div>
+      <div class="prize-ladder" id="prizeLadder" aria-label="Escalera de niveles">
+        <span class="prize-step">1 · 100 XP</span><span class="prize-step">2 · 250 XP</span><span class="prize-step">3 · 500 XP</span><span class="prize-step">4 · 750 XP</span><span class="prize-step">5 · 1.000 XP</span>
+      </div>
+      <div class="game-tools" aria-label="Comodines disponibles">
+        <button class="secondary" id="fiftyButton" type="button">½ 50/50 <span id="fiftyStatus">· 1 uso</span></button>
+        <button class="secondary" id="callButton" type="button">📞 Llamar a Luna <span id="callStatus">· 1 uso</span></button>
+      </div>
+      <aside class="agent-call" id="agentCall" role="status" aria-live="polite" hidden>
+        <div class="agent-avatar" aria-hidden="true">🧑‍🚀</div>
+        <div class="agent-copy"><small>LLAMADA SIMULADA · PISTA, NO RESPUESTA</small><h3>Luna · Agente de seguridad</h3><p id="agentHint"></p></div>
+        <button class="hangup" id="endCallButton" type="button" aria-label="Cerrar llamada">×</button>
+      </aside>
       <div class="scenario-label" id="scenarioLabel">ESCENARIO 01</div>
       <h2 class="question" id="questionText"></h2>
       <p class="context" id="contextText"></p>
@@ -147,7 +193,7 @@
       <div class="result-score" id="finalScore">0 <span>/ 10 puntos</span></div>
       <p class="result-description" id="resultDescription"></p>
       <div class="result-list" id="resultList"></div>
-      <div class="notice">Esta actividad es una simulación local. Los identificadores y eventos son ficticios: no se capturan cookies ni se intervienen sesiones reales.</div>
+      <div class="notice">Esta actividad es una simulación local. Los identificadores y eventos son ficticios: no se capturan cookies ni se intervienen sesiones reales. Luna es un personaje de ayuda con pistas preparadas; no se realiza ninguna llamada real ni se conecta a una IA externa.</div>
       <div style="margin-top:22px"><button class="primary" id="restartButton">Volver a jugar ↻</button></div>
     </section>
 
@@ -166,6 +212,7 @@
           "Usar un identificador corto y fácil de recordar."
         ],
         correct: 1,
+        hint: "Los enlaces suelen terminar en historiales y registros. Protege los datos sensibles en tránsito con cifrado y evita ponerlos en la dirección.",
         good: "Correcto. HTTPS protege la comunicación frente a la lectura o modificación del tráfico durante el transporte.",
         bad: "Un identificador en la URL puede quedar expuesto en el historial, registros o cabeceras de referencia. Un valor predecible también facilita que se adivine.",
         attack: "SIMULACIÓN: el identificador de prueba aparece expuesto y el atacante podría intentar reutilizarlo.",
@@ -181,6 +228,7 @@
           "No configurar atributos y confiar en que el usuario no comparta el enlace."
         ],
         correct: 0,
+        hint: "Piensa en tres riesgos distintos: lectura desde JavaScript, envío sin HTTPS y solicitudes cruzadas. ¿Qué atributos ayudan con cada uno?",
         good: "Correcto. HttpOnly limita el acceso desde JavaScript, Secure restringe el envío a HTTPS y SameSite ayuda a reducir ciertos ataques CSRF.",
         bad: "Sin estos atributos, la cookie queda más expuesta. Por ejemplo, si un atacante consigue ejecutar JavaScript malicioso en el sitio, podría intentar leer una cookie sin HttpOnly.",
         attack: "SIMULACIÓN: una cookie mal configurada deja una oportunidad para que el identificador sea expuesto.",
@@ -196,6 +244,7 @@
           "Generar un nuevo identificador de sesión después de autenticar al usuario."
         ],
         correct: 2,
+        hint: "El usuario acaba de ganar privilegios. Asegúrate de que un identificador anterior no pueda conservar ese nuevo estado.",
         good: "Correcto. Renovar el identificador al cambiar el estado de autenticación ayuda a prevenir la fijación de sesión (session fixation).",
         bad: "Si el identificador previo se mantiene después del inicio de sesión, un atacante que lo conociera podría intentar aprovecharlo para fijar o reutilizar la sesión.",
         attack: "SIMULACIÓN: el identificador previo continúa activo tras el inicio de sesión; existe riesgo de fijación de sesión.",
@@ -211,6 +260,7 @@
           "Cerrar la pestaña y asumir que la sesión desapareció."
         ],
         correct: 1,
+        hint: "Borrar datos en la pantalla no basta si el servidor sigue aceptando la sesión. La invalidación debe ocurrir también en el servidor.",
         good: "Correcto. El servidor debe invalidar la sesión; borrar la cookie del navegador por sí solo no garantiza que el identificador deje de funcionar.",
         bad: "Si la sesión sigue activa en el servidor, alguien que conserve el identificador podría intentar usarla aunque el usuario ya haya salido de la pantalla.",
         attack: "SIMULACIÓN: la sesión sigue activa después de salir de la página. Un identificador conocido aún podría ser reutilizado.",
@@ -226,6 +276,7 @@
           "Definir un tiempo de inactividad y límites de duración acordes con el riesgo de la aplicación."
         ],
         correct: 2,
+        hint: "Si una sesión abandonada nunca vence, la ventana para reutilizarla sigue abierta. Define límites según la sensibilidad de la aplicación.",
         good: "Correcto. La expiración por inactividad y los límites de duración reducen el tiempo durante el cual una sesión abandonada puede ser utilizada.",
         bad: "Una sesión que nunca vence puede seguir siendo útil para un atacante durante mucho tiempo si el identificador queda expuesto.",
         attack: "SIMULACIÓN: una sesión abandonada permanece activa y amplía la oportunidad de reutilización.",
@@ -236,6 +287,11 @@
     let current = 0;
     let score = 0;
     let answers = [];
+    let lives = 3;
+    let fiftyUsed = false;
+    let callUsed = false;
+    let answered = false;
+    const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP"];
 
     const welcomeScreen = document.getElementById('welcomeScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -243,11 +299,32 @@
     const optionsContainer = document.getElementById('optionsContainer');
     const feedbackBox = document.getElementById('feedbackBox');
     const nextButton = document.getElementById('nextButton');
+    const fiftyButton = document.getElementById('fiftyButton');
+    const callButton = document.getElementById('callButton');
+    const agentCall = document.getElementById('agentCall');
+
+    function updateGameStatus() {
+      document.getElementById('livesCount').textContent = lives;
+      document.getElementById('heartsDisplay').textContent = lives > 0 ? Array(lives).fill('♥').join(' ') : '—';
+      document.getElementById('livesDisplay').setAttribute('aria-label', `${lives} ${lives === 1 ? 'vida restante' : 'vidas restantes'}`);
+      fiftyButton.disabled = fiftyUsed || answered;
+      document.getElementById('fiftyStatus').textContent = fiftyUsed ? '· usado' : '· 1 uso';
+      callButton.disabled = callUsed || answered;
+      document.getElementById('callStatus').textContent = callUsed ? '· usada' : '· 1 uso';
+      document.querySelectorAll('.prize-step').forEach((step, index) => {
+        step.classList.toggle('active', index === current);
+        step.classList.toggle('cleared', index < current);
+      });
+    }
 
     function startGame() {
       current = 0;
       score = 0;
       answers = [];
+      lives = 3;
+      fiftyUsed = false;
+      callUsed = false;
+      answered = false;
       welcomeScreen.hidden = true;
       resultScreen.hidden = true;
       gameScreen.hidden = false;
@@ -256,16 +333,20 @@
 
     function renderScenario() {
       const item = scenarios[current];
-      document.getElementById('stepLabel').textContent = `DECISIÓN ${current + 1} DE ${scenarios.length}`;
+      answered = false;
+      agentCall.hidden = true;
+      document.getElementById('stepLabel').textContent = `NIVEL ${current + 1} DE ${scenarios.length}`;
+      document.getElementById('prizeLabel').textContent = `Premio: ${prizes[current]}`;
       document.getElementById('scoreLabel').textContent = `Puntos: ${score} / 10`;
       document.getElementById('progressFill').style.width = `${(current / scenarios.length) * 100}%`;
-      document.getElementById('scenarioLabel').textContent = `ESCENARIO 0${current + 1} · ${item.label}`;
+      document.getElementById('scenarioLabel').textContent = `NIVEL 0${current + 1} · ${item.label}`;
       document.getElementById('questionText').textContent = item.question;
       document.getElementById('contextText').textContent = item.context;
       optionsContainer.innerHTML = '';
       feedbackBox.className = 'feedback';
       nextButton.hidden = true;
-      nextButton.textContent = current === scenarios.length - 1 ? 'Ver resultado →' : 'Continuar →';
+      nextButton.textContent = current === scenarios.length - 1 ? 'Ver resultado →' : 'Siguiente nivel →';
+      updateGameStatus();
 
       item.options.forEach((optionText, index) => {
         const button = document.createElement('button');
@@ -283,9 +364,12 @@
     }
 
     function chooseOption(selected) {
+      if (answered) return;
+      answered = true;
       const item = scenarios[current];
       const correct = selected === item.correct;
       if (correct) score += 2;
+      else lives -= 1;
       answers.push({ selected, correct, label: item.label });
 
       Array.from(optionsContainer.children).forEach((button, index) => {
@@ -301,22 +385,27 @@
       simulation.textContent = correct ? item.safe : item.attack;
       simulation.className = `simulation ${correct ? 'safe' : ''}`;
       document.getElementById('scoreLabel').textContent = `Puntos: ${score} / 10`;
+      updateGameStatus();
+      nextButton.textContent = lives === 0 || current === scenarios.length - 1 ? 'Ver resultado →' : 'Siguiente nivel →';
       nextButton.hidden = false;
     }
 
     function showResults() {
       gameScreen.hidden = true;
       resultScreen.hidden = false;
-      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('progressFill').style.width = `${(Math.min(current + 1, scenarios.length) / scenarios.length) * 100}%`;
       document.getElementById('finalScore').innerHTML = `${score} <span>/ 10 puntos</span>`;
       let title;
       let description;
-      if (score >= 8) {
+      if (lives === 0) {
+        title = 'Fin de la partida';
+        description = 'Te quedaste sin vidas, pero cada respuesta te enseñó una defensa. Repasa los escenarios y vuelve a intentarlo.';
+      } else if (score >= 8) {
         title = '¡Misión protegida!';
-        description = 'Tomaste decisiones que reducen los principales riesgos de gestión de sesiones. La aplicación queda mejor protegida frente a intentos de secuestro de sesión.';
+        description = `¡Excelente! Superaste los cinco niveles con ${lives} ${lives === 1 ? 'vida restante' : 'vidas restantes'} y protegiste la sesión con buenas decisiones.`;
       } else if (score >= 4) {
         title = 'Protección parcial';
-        description = 'Aplicaste algunas medidas correctas, pero todavía quedan debilidades que podrían facilitar la exposición o reutilización de una sesión.';
+        description = `Aplicaste algunas medidas correctas y terminaste con ${lives} ${lives === 1 ? 'vida' : 'vidas'}. Repasa las decisiones marcadas como riesgo para fortalecer la sesión.`;
       } else {
         title = 'Sesión comprometida';
         description = 'Varias decisiones dejaron oportunidades para el atacante. Repasa las medidas de protección e inténtalo de nuevo.';
@@ -333,14 +422,40 @@
         name.textContent = `${index + 1}. ${answer.label}`;
         const status = document.createElement('strong');
         status.className = `status ${answer.correct ? 'ok' : 'fail'}`;
-        status.textContent = answer.correct ? '+2 · CORRECTO' : '0 · RIESGO';
+        status.textContent = answer.correct ? '+2 · CORRECTO' : '−1 vida · RIESGO';
         row.append(name, status);
         list.appendChild(row);
       });
     }
 
+    function useFiftyFifty() {
+      if (fiftyUsed || answered) return;
+      fiftyUsed = true;
+      const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== scenarios[current].correct);
+      wrongButtons.slice(0, 1).forEach(button => {
+        button.hidden = true;
+        button.setAttribute('aria-hidden', 'true');
+      });
+      updateGameStatus();
+    }
+
+    function callAgent() {
+      if (callUsed || answered) return;
+      callUsed = true;
+      document.getElementById('agentHint').textContent = scenarios[current].hint;
+      agentCall.hidden = false;
+      updateGameStatus();
+    }
+
     document.getElementById('startButton').addEventListener('click', startGame);
+    fiftyButton.addEventListener('click', useFiftyFifty);
+    callButton.addEventListener('click', callAgent);
+    document.getElementById('endCallButton').addEventListener('click', () => { agentCall.hidden = true; });
     nextButton.addEventListener('click', () => {
+      if (lives === 0) {
+        showResults();
+        return;
+      }
       current += 1;
       if (current < scenarios.length) renderScenario();
       else showResults();
