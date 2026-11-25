@@ -5,3 +5,13 @@ services:
     buildCommand: ""
     staticPublishPath: .
     plan: free
+  - type: web
+    name: session-lab-salas
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://session-lab-sesiones-inseguras.onrender.com,https://session-lab-salas.onrender.com

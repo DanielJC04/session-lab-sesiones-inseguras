@@ -115,6 +115,22 @@
     .status.ok { color: var(--green); }
     .status.fail { color: var(--red); }
     .notice { margin-top: 18px; padding: 12px 14px; border-left: 3px solid var(--yellow); color: var(--muted); background: rgba(244,201,107,.06); font-size: 12px; }
+    .group-entry { margin-top: 24px; padding-top: 21px; border-top: 1px solid var(--line); }
+    .group-entry h3 { margin: 0 0 5px; font-size: 16px; }
+    .group-entry p { margin: 0 0 13px; font-size: 13px; }
+    .group-entry-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 9px; }
+    .group-entry-row input { flex: 1 1 170px; min-width: 0; border: 1px solid #35516c; border-radius: 9px; padding: 10px 12px; color: var(--text); background: #0d1928; font: inherit; }
+    .group-entry-row input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+    .group-error { min-height: 20px; margin-top: 8px !important; color: var(--red) !important; }
+    .room-code { display: inline-block; margin: 8px 0 12px; padding: 8px 15px; border: 1px solid #2c7180; border-radius: 12px; color: var(--cyan); background: #0d1928; font-size: 28px; font-weight: 900; letter-spacing: .16em; }
+    .group-players { display: grid; gap: 8px; margin: 10px 0 20px; padding: 0; list-style: none; }
+    .group-players li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #0d1928; }
+    .group-players small { color: var(--muted); }
+    .group-standings { margin-top: 19px; }
+    .group-standings h3 { margin-bottom: 8px; font-size: 15px; }
+    .group-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .group-status { min-height: 20px; margin: 14px 0 0; color: var(--muted); font-size: 13px; }
+    .group-feedback { margin-top: 16px; }
     footer { margin-top: 22px; color: #71839b; font-size: 11px; text-align: center; }
     [hidden] { display: none !important; }
     @media (max-width: 650px) {
@@ -149,9 +165,72 @@
           <p>Responde diez preguntas al estilo concurso y protege la sesión. Tienes 15 segundos por pregunta, tres vidas y dos comodines.</p>
           <div class="facts"><span>10 niveles de premio</span><span>3 vidas</span><span>15 segundos por pregunta</span></div>
           <button class="primary" id="startButton">Jugar por el premio →</button>
+          <div class="group-entry">
+            <h3>¿Quieren jugar varias personas?</h3>
+            <p>Crea una sala remota y comparte el código. Cada participante juega desde su propio dispositivo.</p>
+            <div class="group-entry-row">
+              <input id="groupPlayerName" type="text" maxlength="24" autocomplete="nickname" aria-label="Tu nombre para la partida grupal" placeholder="Tu nombre">
+              <button class="secondary" id="createGroupButton" type="button">Crear sala</button>
+            </div>
+            <div class="group-entry-row">
+              <input id="groupRoomCode" type="text" maxlength="6" autocomplete="off" aria-label="Código de la sala" placeholder="Código de 6 caracteres">
+              <button class="secondary" id="joinGroupButton" type="button">Unirse a sala</button>
+            </div>
+            <p class="group-error" id="groupEntryError" role="alert"></p>
+          </div>
         </div>
         <div class="mission"><strong>TUS COMODINES</strong><span>El 50/50 deja dos respuestas posibles. Activa el escudo antes de responder: si fallas, no ganas puntos ni pierdes una vida, y pasas a la siguiente pregunta. El escudo se conserva si aciertas; el tiempo agotado siempre cuesta una vida.</span></div>
       </div>
+    </section>
+
+    <section class="panel welcome" id="groupLobbyScreen" hidden>
+      <div class="eyebrow">Partida grupal</div>
+      <h2>Sala de Session Lab</h2>
+      <p class="subtitle">Comparte este código con las demás personas. Necesitan abrir el juego desde sus dispositivos y unirse antes de que comience la trivia.</p>
+      <div class="room-code" id="groupRoomCodeDisplay" aria-label="Código de la sala"></div>
+      <h3>Participantes</h3>
+      <ul class="group-players" id="groupLobbyPlayers"></ul>
+      <p class="group-status" id="groupLobbyStatus" aria-live="polite">Esperando participantes...</p>
+      <div class="group-actions">
+        <button class="primary" id="groupStartButton" type="button" disabled>Iniciar trivia</button>
+        <button class="secondary" id="leaveGroupButton" type="button">Salir de la sala</button>
+      </div>
+    </section>
+
+    <section class="panel game" id="groupGameScreen" hidden>
+      <div class="game-top">
+        <div><div class="step" id="groupStepLabel">PREGUNTA 1 DE 10</div><div class="prize-label" id="groupPrizeLabel">Premio: 100 XP</div></div>
+        <div class="status-group">
+          <div class="score-chip" id="groupScoreLabel">Puntos: 0 / 20</div>
+          <div class="lives" aria-label="Vidas restantes"><span class="hearts" id="groupHeartsDisplay">♥ ♥ ♥</span><span id="groupLivesCount">3</span></div>
+          <div class="timer" id="groupTimerDisplay" role="timer" aria-label="15 segundos restantes"><span aria-hidden="true">⏱</span><strong id="groupTimerCount">15</strong><span>s</span></div>
+        </div>
+      </div>
+      <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="groupTimerFill"></div></div>
+      <div class="track"><div class="track-fill" id="groupProgressFill"></div></div>
+      <div class="game-tools" aria-label="Comodines grupales disponibles">
+        <button class="secondary" id="groupFiftyButton" type="button">½ 50/50 · 1 uso</button>
+        <button class="secondary" id="groupShieldButton" type="button" aria-pressed="false">🛡 Activar escudo · 1 uso</button>
+      </div>
+      <div class="scenario-label" id="groupScenarioLabel">PREGUNTA 01</div>
+      <h2 class="question" id="groupQuestionText"></h2>
+      <p class="context" id="groupContextText"></p>
+      <div class="options" id="groupOptionsContainer"></div>
+      <div class="feedback group-feedback" id="groupFeedbackBox" aria-live="polite">
+        <h3 id="groupFeedbackTitle"></h3>
+        <p id="groupFeedbackText"></p>
+        <div class="simulation" id="groupSimulationText"></div>
+      </div>
+      <div class="group-standings"><h3>Marcador de la sala</h3><ul class="group-players" id="groupGamePlayers"></ul></div>
+      <p class="group-status" id="groupGameStatus" aria-live="polite">Responde antes de que termine el tiempo.</p>
+    </section>
+
+    <section class="panel result" id="groupResultScreen" hidden>
+      <div class="eyebrow">Informe de la misión grupal</div>
+      <h2 id="groupResultTitle">Resultados</h2>
+      <p class="result-description" id="groupResultDescription"></p>
+      <div class="result-list" id="groupResultList"></div>
+      <div class="group-actions"><button class="primary" id="groupReturnButton" type="button">Volver al inicio</button></div>
     </section>
 
     <section class="panel game" id="gameScreen" hidden>
@@ -197,6 +276,7 @@
     <footer>SESSION LAB · Práctica académica sobre gestión segura de sesiones</footer>
   </main>
 
+  <script src="answer-key.js"></script>
   <script>
     const scenarios = [
       {
@@ -209,7 +289,6 @@
           "Usar un identificador corto y fácil de recordar.",
           "Transmitirlo en texto plano mediante HTTP para inspeccionar el tráfico."
         ],
-        correct: 1,
         good: "Correcto. HTTPS protege la comunicación frente a la lectura o modificación del tráfico durante el transporte.",
         bad: "Un identificador en la URL puede quedar expuesto en el historial, registros o cabeceras de referencia. Un valor predecible facilita que se adivine, y HTTP no cifra el tráfico.",
         attack: "SIMULACIÓN: el identificador de prueba aparece expuesto y el atacante podría intentar reutilizarlo.",
@@ -225,7 +304,6 @@
           "No configurar atributos y confiar en que el usuario no comparta el enlace.",
           "Guardar el identificador en localStorage para que los scripts lo reutilicen."
         ],
-        correct: 0,
         good: "Correcto. HttpOnly limita el acceso desde JavaScript, Secure restringe el envío a HTTPS y SameSite ayuda a reducir ciertos ataques CSRF.",
         bad: "Sin estos atributos, la cookie queda más expuesta. JavaScript malicioso también puede leer valores de localStorage, mientras que HttpOnly impide que JavaScript lea la cookie.",
         attack: "SIMULACIÓN: una cookie mal configurada deja una oportunidad para que el identificador sea expuesto.",
@@ -241,7 +319,6 @@
           "Generar un nuevo identificador de sesión después de autenticar al usuario.",
           "Usar un identificador fijo compartido por todos los usuarios."
         ],
-        correct: 2,
         good: "Correcto. Renovar el identificador al cambiar el estado de autenticación ayuda a prevenir la fijación de sesión (session fixation).",
         bad: "Un identificador previo o compartido puede ser conocido y reutilizado por otra persona. Renueva el identificador al autenticar al usuario.",
         attack: "SIMULACIÓN: el identificador previo continúa activo tras el inicio de sesión; existe riesgo de fijación de sesión.",
@@ -257,7 +334,6 @@
           "Cerrar la pestaña y asumir que la sesión desapareció.",
           "Borrar la cookie del navegador, pero dejar vigente la sesión del servidor."
         ],
-        correct: 1,
         good: "Correcto. El servidor debe invalidar la sesión; borrar la cookie del navegador por sí solo no garantiza que el identificador deje de funcionar.",
         bad: "Si la sesión sigue activa en el servidor, alguien que conserve el identificador podría intentar usarla aunque el usuario ya haya salido de la pantalla.",
         attack: "SIMULACIÓN: la sesión sigue activa después de salir de la página. Un identificador conocido aún podría ser reutilizado.",
@@ -273,7 +349,6 @@
           "Definir un tiempo de inactividad y límites de duración acordes con el riesgo de la aplicación.",
           "Expirarla solo cuando se cierre el navegador, sin límite de inactividad."
         ],
-        correct: 2,
         good: "Correcto. La expiración por inactividad y los límites de duración reducen el tiempo durante el cual una sesión abandonada puede ser utilizada.",
         bad: "Una sesión que nunca vence puede seguir siendo útil para un atacante durante mucho tiempo si el identificador queda expuesto.",
         attack: "SIMULACIÓN: una sesión abandonada permanece activa y amplía la oportunidad de reutilización.",
@@ -289,7 +364,6 @@
           "Añadir el identificador de sesión a la URL para renovarlo fácilmente.",
           "Conservar vigente el identificador anterior hasta su expiración."
         ],
-        correct: 1,
         good: "Correcto. Rotar el identificador al cambiar privilegios evita que un valor previo se reutilice para acceder al estado autenticado.",
         bad: "Si el identificador anterior sigue vigente tras un cambio de privilegios, quien ya lo conocía podría intentar reutilizarlo.",
         attack: "SIMULACIÓN: un identificador previo conserva acceso después de que la cuenta obtuvo más privilegios.",
@@ -305,7 +379,6 @@
           "Que incluyan el nombre de usuario y la fecha para reconocerlos.",
           "Que todas las sesiones de una cuenta reutilicen el mismo identificador."
         ],
-        correct: 1,
         good: "Correcto. Los identificadores impredecibles y con suficiente entropía reducen la posibilidad de adivinarlos o fabricarlos.",
         bad: "Los valores consecutivos, basados en datos conocidos o reutilizados pueden ser predecibles y facilitar la suplantación de una sesión.",
         attack: "SIMULACIÓN: un identificador predecible puede permitir que otra persona intente adivinar o fabricar una sesión válida.",
@@ -321,7 +394,6 @@
           "Poner el identificador de sesión en la dirección URL.",
           "Aceptar cualquier solicitud POST que incluya una cookie válida."
         ],
-        correct: 1,
         good: "Correcto. Los tokens anti-CSRF y la validación del origen ayudan a comprobar que la acción fue iniciada desde el sitio esperado; SameSite añade defensa en profundidad.",
         bad: "HTTPS protege el transporte, pero no demuestra que la persona quiso iniciar la acción. Valida tokens anti-CSRF y el origen; no confíes solo en la cookie.",
         attack: "SIMULACIÓN: el navegador adjunta la cookie a una solicitud no deseada y el servidor no comprueba su origen.",
@@ -337,7 +409,6 @@
           "Revocar la sesión en el servidor y pedir al usuario que se autentique de nuevo.",
           "Borrar el identificador solo del navegador del usuario afectado."
         ],
-        correct: 2,
         good: "Correcto. Al invalidar la sesión en el servidor, el identificador filtrado deja de servir; después se puede iniciar una sesión nueva de forma segura.",
         bad: "Mientras el servidor acepte el identificador filtrado, podría seguir utilizándose. Revoca la sesión desde el servidor y solicita una nueva autenticación.",
         attack: "SIMULACIÓN: el identificador filtrado sigue activo y puede ser reutilizado desde otro navegador.",
@@ -353,7 +424,6 @@
           "Redactar identificadores y evitar registrar cookies o cabeceras de autenticación completas.",
           "Compartir los identificadores en mensajes de error para correlacionar solicitudes."
         ],
-        correct: 2,
         good: "Correcto. Redactar los identificadores y limitar la captura de cookies y cabeceras reduce la posibilidad de que un registro se convierta en una fuente de robo de sesiones.",
         bad: "Los registros y las herramientas de analítica pueden copiarse, consultarse o conservarse. No guardes identificadores completos ni credenciales de sesión.",
         attack: "SIMULACIÓN: un identificador aparece en un registro o evento accesible para más personas de las necesarias.",
@@ -377,6 +447,20 @@
     const timerSeconds = 15;
     const feedbackDelay = 1600;
     const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP", "1.500 XP", "2.000 XP", "2.500 XP", "3.000 XP", "5.000 XP"];
+    const multiplayerSocketUrl = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      ? `ws://${location.host}/ws`
+      : 'wss://session-lab-salas.onrender.com/ws';
+    const answerKey = window.sessionLabAnswerKey;
+    let groupSocket = null;
+    let groupPlayerId = '';
+    let groupHost = false;
+    let groupCode = '';
+    let groupQuestionIndex = -1;
+    let groupAnswered = false;
+    let groupRoundRevealed = false;
+    let groupDeadline = 0;
+    let groupTimerInterval = null;
+    let groupShieldArmed = false;
 
     function createQuestionOrder() {
       const order = scenarios.map((_, index) => index);
@@ -398,6 +482,10 @@
     const nextButton = document.getElementById('nextButton');
     const fiftyButton = document.getElementById('fiftyButton');
     const shieldButton = document.getElementById('shieldButton');
+    const groupEntryError = document.getElementById('groupEntryError');
+    const groupLobbyScreen = document.getElementById('groupLobbyScreen');
+    const groupGameScreen = document.getElementById('groupGameScreen');
+    const groupResultScreen = document.getElementById('groupResultScreen');
 
     function stopTimer() {
       if (timerInterval !== null) {
@@ -512,7 +600,7 @@
       stopTimer();
       answered = true;
       const item = scenarios[questionOrder[current]];
-      const correct = selected === item.correct;
+      const correct = selected === answerKey[questionOrder[current]];
       const shieldSaved = !correct && shieldArmed && !shieldUsed;
       if (correct) {
         score += 2;
@@ -528,7 +616,7 @@
 
       Array.from(optionsContainer.children).forEach((button, index) => {
         button.disabled = true;
-        if (index === item.correct) button.classList.add('correct');
+        if (index === answerKey[questionOrder[current]]) button.classList.add('correct');
         if (index === selected && !correct) button.classList.add('wrong');
       });
 
@@ -564,7 +652,7 @@
 
       Array.from(optionsContainer.children).forEach((button, index) => {
         button.disabled = true;
-        if (index === item.correct) button.classList.add('correct');
+        if (index === answerKey[questionOrder[current]]) button.classList.add('correct');
       });
 
       feedbackBox.className = 'feedback show bad';
@@ -647,7 +735,7 @@
     function useFiftyFifty() {
       if (fiftyUsed || answered) return;
       fiftyUsed = true;
-      const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== scenarios[questionOrder[current]].correct);
+      const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== answerKey[questionOrder[current]]);
       wrongButtons.slice(0, 2).forEach(button => {
         button.hidden = true;
         button.setAttribute('aria-hidden', 'true');
@@ -661,7 +749,370 @@
       updateGameStatus();
     }
 
+    function showGroupEntryError(message) {
+      groupEntryError.textContent = message;
+    }
+
+    function sendGroupMessage(message) {
+      if (!groupSocket || groupSocket.readyState !== WebSocket.OPEN) {
+        showGroupEntryError('No hay conexión con la sala. Intenta conectarte de nuevo.');
+        return;
+      }
+      groupSocket.send(JSON.stringify(message));
+    }
+
+    function connectToGroup(type) {
+      const name = document.getElementById('groupPlayerName').value.trim();
+      const roomInput = document.getElementById('groupRoomCode');
+      const code = roomInput.value.trim().toUpperCase();
+      if (!name || name.length > 24) {
+        showGroupEntryError('Escribe un nombre de 1 a 24 caracteres.');
+        return;
+      }
+      if (type === 'join' && !/^[A-HJ-NP-Z2-9]{6}$/.test(code)) {
+        showGroupEntryError('Ingresa un código válido de seis caracteres.');
+        return;
+      }
+      if (groupSocket) groupSocket.close();
+      showGroupEntryError('Conectando con la sala...');
+      const createButton = document.getElementById('createGroupButton');
+      const joinButton = document.getElementById('joinGroupButton');
+      createButton.disabled = true;
+      joinButton.disabled = true;
+      let socket;
+      try {
+        socket = new WebSocket(multiplayerSocketUrl);
+      } catch (error) {
+        createButton.disabled = false;
+        joinButton.disabled = false;
+        showGroupEntryError('No se pudo iniciar la conexión. Comprueba tu navegador y vuelve a intentarlo.');
+        return;
+      }
+      groupSocket = socket;
+      socket.addEventListener('open', () => {
+        socket.send(JSON.stringify(type === 'create'
+          ? { type: 'create', name }
+          : { type: 'join', name, code }));
+      });
+      socket.addEventListener('message', event => {
+        let message;
+        try {
+          message = JSON.parse(event.data);
+        } catch (error) {
+          showGroupEntryError('El servidor envió una respuesta que no se pudo leer.');
+          return;
+        }
+        handleGroupMessage(message);
+      });
+      socket.addEventListener('error', () => {
+        createButton.disabled = false;
+        joinButton.disabled = false;
+        showGroupEntryError('No se pudo conectar al servidor de salas. Vuelve a intentarlo en unos segundos.');
+      });
+      socket.addEventListener('close', () => {
+        clearInterval(groupTimerInterval);
+        createButton.disabled = false;
+        joinButton.disabled = false;
+        if (groupSocket === socket) {
+          groupSocket = null;
+          if (!welcomeScreen.hidden && groupEntryError.textContent === 'Conectando con la sala...') {
+            showGroupEntryError('La conexión se cerró antes de entrar a la sala.');
+          } else if (!groupLobbyScreen.hidden || !groupGameScreen.hidden) {
+            document.getElementById('groupGameStatus').textContent = 'Se perdió la conexión con la sala. Recarga la página para volver a entrar.';
+          }
+        }
+      });
+    }
+
+    function renderGroupPlayers(players, target) {
+      target.innerHTML = '';
+      players.forEach(player => {
+        const row = document.createElement('li');
+        const name = document.createElement('span');
+        name.textContent = `${player.name}${player.id === groupPlayerId ? ' (tú)' : ''}`;
+        const details = document.createElement('small');
+        if (player.online === false) details.textContent = 'Desconectado';
+        else if (player.eliminated || player.lives === 0) details.textContent = 'Sin vidas';
+        else details.textContent = `${player.score} puntos · ${player.lives} vidas`;
+        row.append(name, details);
+        target.appendChild(row);
+      });
+    }
+
+    function updateGroupLobby(message) {
+      if (message.phase !== 'lobby') return;
+      groupHost = message.hostId === groupPlayerId;
+      renderGroupPlayers(message.players, document.getElementById('groupLobbyPlayers'));
+      const startButton = document.getElementById('groupStartButton');
+      startButton.hidden = !groupHost;
+      startButton.disabled = message.players.filter(player => player.online !== false).length < 2;
+      document.getElementById('groupLobbyStatus').textContent = groupHost
+        ? startButton.disabled
+          ? 'Comparte el código y espera a que se una al menos otra persona.'
+          : 'La sala está lista. Puedes iniciar la trivia.'
+        : 'Esperando a que quien creó la sala inicie la trivia...';
+    }
+
+    function updateGroupScore(score, lives) {
+      document.getElementById('groupScoreLabel').textContent = `Puntos: ${score} / ${scenarios.length * 2}`;
+      document.getElementById('groupLivesCount').textContent = lives;
+      document.getElementById('groupHeartsDisplay').textContent = lives > 0 ? Array(lives).fill('♥').join(' ') : '—';
+    }
+
+    function updateGroupTimer() {
+      const remaining = Math.max(0, groupDeadline - Date.now());
+      const seconds = Math.ceil(remaining / 1000);
+      document.getElementById('groupTimerCount').textContent = seconds;
+      document.getElementById('groupTimerDisplay').setAttribute('aria-label', `${seconds} segundos restantes`);
+      document.getElementById('groupTimerDisplay').classList.toggle('urgent', seconds <= 5);
+      document.getElementById('groupTimerFill').style.width = `${Math.min(100, (remaining / 15000) * 100)}%`;
+      document.getElementById('groupTimerFill').classList.toggle('urgent', seconds <= 5);
+    }
+
+    function setGroupOptionsDisabled(disabled) {
+      document.querySelectorAll('#groupOptionsContainer .option').forEach(button => {
+        button.disabled = disabled;
+      });
+      document.getElementById('groupFiftyButton').disabled = disabled || document.getElementById('groupFiftyButton').dataset.used === 'true';
+      document.getElementById('groupShieldButton').disabled = disabled || document.getElementById('groupShieldButton').dataset.used === 'true';
+    }
+
+    function renderGroupQuestion(message) {
+      clearInterval(groupTimerInterval);
+      groupQuestionIndex = message.questionIndex;
+      groupDeadline = message.deadline;
+      groupAnswered = Boolean(message.eliminated);
+      groupRoundRevealed = false;
+      groupShieldArmed = false;
+      const item = scenarios[groupQuestionIndex];
+      groupLobbyScreen.hidden = true;
+      groupResultScreen.hidden = true;
+      groupGameScreen.hidden = false;
+      document.getElementById('groupStepLabel').textContent = `PREGUNTA ${message.current + 1} DE ${message.total}`;
+      document.getElementById('groupPrizeLabel').textContent = `Premio: ${prizes[message.current]}`;
+      document.getElementById('groupProgressFill').style.width = `${(message.current / message.total) * 100}%`;
+      document.getElementById('groupScenarioLabel').textContent = `PREGUNTA ${String(message.current + 1).padStart(2, '0')} · ${item.label}`;
+      document.getElementById('groupQuestionText').textContent = item.question;
+      document.getElementById('groupContextText').textContent = item.context;
+      updateGroupScore(message.score, message.lives);
+      document.getElementById('groupFiftyButton').dataset.used = String(message.fiftyUsed);
+      document.getElementById('groupFiftyButton').textContent = message.fiftyUsed ? '½ 50/50 · usado' : '½ 50/50 · 1 uso';
+      document.getElementById('groupShieldButton').dataset.used = String(message.shieldUsed);
+      document.getElementById('groupShieldButton').textContent = message.shieldUsed ? '🛡 Escudo · usado' : '🛡 Activar escudo · 1 uso';
+      document.getElementById('groupShieldButton').classList.remove('active');
+      document.getElementById('groupShieldButton').setAttribute('aria-pressed', 'false');
+      const feedback = document.getElementById('groupFeedbackBox');
+      feedback.className = 'feedback group-feedback';
+      document.getElementById('groupOptionsContainer').innerHTML = '';
+      item.options.forEach((optionText, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'option';
+        button.disabled = groupAnswered;
+        const letter = document.createElement('span');
+        letter.className = 'option-letter';
+        letter.textContent = String.fromCharCode(65 + index);
+        const text = document.createElement('span');
+        text.textContent = optionText;
+        button.append(letter, text);
+        button.addEventListener('click', () => {
+          if (!groupAnswered) sendGroupMessage({ type: 'answer', selected: index });
+        });
+        document.getElementById('groupOptionsContainer').appendChild(button);
+      });
+      document.getElementById('groupGameStatus').textContent = message.eliminated
+        ? 'Te quedaste sin vidas. Puedes seguir la explicación de las preguntas restantes.'
+        : 'Responde antes de que termine el tiempo.';
+      renderGroupPlayers(message.players, document.getElementById('groupGamePlayers'));
+      setGroupOptionsDisabled(groupAnswered);
+      updateGroupTimer();
+      groupTimerInterval = setInterval(updateGroupTimer, 200);
+    }
+
+    function showGroupAnswer(message) {
+      groupAnswered = true;
+      updateGroupScore(message.score, message.lives);
+      setGroupOptionsDisabled(true);
+      const item = scenarios[groupQuestionIndex];
+      const feedback = document.getElementById('groupFeedbackBox');
+      const title = document.getElementById('groupFeedbackTitle');
+      const text = document.getElementById('groupFeedbackText');
+      const simulation = document.getElementById('groupSimulationText');
+      feedback.className = 'feedback show group-feedback';
+      document.querySelectorAll('#groupOptionsContainer .option').forEach((button, index) => {
+        if (index === message.correctOption) button.classList.add('correct');
+        if (index === message.selected && !message.correct && !message.timeout) button.classList.add('wrong');
+      });
+      if (message.timeout) {
+        feedback.classList.add('bad');
+        title.textContent = '⏰ ¡Se agotó el tiempo!';
+        text.textContent = 'Perdiste la oportunidad de responder y una vida. La respuesta segura se resalta antes de avanzar.';
+        simulation.textContent = item.safe;
+        simulation.className = 'simulation safe';
+      } else if (message.correct) {
+        feedback.classList.add('good');
+        title.textContent = '✓ Decisión segura';
+        text.textContent = item.good;
+        simulation.textContent = item.safe;
+        simulation.className = 'simulation safe';
+      } else if (message.shieldSaved) {
+        feedback.classList.add('shielded');
+        title.textContent = '🛡 ¡Escudo activado!';
+        text.textContent = `El escudo te salva: no ganas puntos ni pierdes vida. ${item.bad}`;
+        simulation.textContent = item.attack;
+        simulation.className = 'simulation';
+      } else {
+        feedback.classList.add('bad');
+        title.textContent = '✕ Riesgo detectado';
+        text.textContent = item.bad;
+        simulation.textContent = item.attack;
+        simulation.className = 'simulation';
+      }
+      document.getElementById('groupGameStatus').textContent = 'Respuesta registrada. Esperando al resto de participantes...';
+    }
+
+    function renderGroupResult(players) {
+      clearInterval(groupTimerInterval);
+      groupGameScreen.hidden = true;
+      groupLobbyScreen.hidden = true;
+      groupResultScreen.hidden = false;
+      const sorted = players.slice().sort((a, b) => b.score - a.score || b.lives - a.lives);
+      const topScore = sorted.length ? sorted[0].score : 0;
+      const winners = sorted.filter(player => player.score === topScore);
+      document.getElementById('groupResultTitle').textContent = winners.length === 1
+        ? `¡Gana ${winners[0].name}!`
+        : '¡Hay empate!';
+      document.getElementById('groupResultDescription').textContent = `La trivia terminó. ${topScore} puntos fue el mejor resultado de la sala.`;
+      const list = document.getElementById('groupResultList');
+      list.innerHTML = '';
+      sorted.forEach((player, index) => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const name = document.createElement('span');
+        name.textContent = `${index + 1}. ${player.name}`;
+        const score = document.createElement('strong');
+        score.className = 'status ok';
+        score.textContent = `${player.score} puntos · ${player.lives} vidas`;
+        row.append(name, score);
+        list.appendChild(row);
+      });
+    }
+
+    function handleGroupMessage(message) {
+      if (message.type === 'error') {
+        document.getElementById('createGroupButton').disabled = false;
+        document.getElementById('joinGroupButton').disabled = false;
+        showGroupEntryError(message.message);
+        document.getElementById('groupLobbyStatus').textContent = message.message;
+        return;
+      }
+      if (message.type === 'room_joined') {
+        groupPlayerId = message.playerId;
+        groupCode = message.roomCode;
+        groupHost = message.host;
+        groupEntryError.textContent = '';
+        welcomeScreen.hidden = true;
+        groupGameScreen.hidden = true;
+        groupResultScreen.hidden = true;
+        groupLobbyScreen.hidden = false;
+        document.getElementById('groupRoomCodeDisplay').textContent = groupCode;
+        updateGroupLobby({ ...message, hostId: groupHost ? groupPlayerId : '', phase: 'lobby' });
+        return;
+      }
+      if (message.type === 'lobby_update') {
+        groupCode = message.roomCode;
+        if (!groupLobbyScreen.hidden) updateGroupLobby(message);
+        return;
+      }
+      if (message.type === 'question') {
+        renderGroupQuestion(message);
+        return;
+      }
+      if (message.type === 'answer_result') {
+        showGroupAnswer(message);
+        return;
+      }
+      if (message.type === 'lifeline_result') {
+        if (message.name === 'fifty') {
+          message.removedOptions.forEach(index => {
+            const option = document.querySelectorAll('#groupOptionsContainer .option')[index];
+            if (option) {
+              option.hidden = true;
+              option.setAttribute('aria-hidden', 'true');
+            }
+          });
+          document.getElementById('groupFiftyButton').dataset.used = 'true';
+          document.getElementById('groupFiftyButton').textContent = '½ 50/50 · usado';
+          document.getElementById('groupFiftyButton').disabled = true;
+        } else if (message.name === 'shield') {
+          groupShieldArmed = message.armed;
+          const button = document.getElementById('groupShieldButton');
+          button.classList.toggle('active', groupShieldArmed);
+          button.setAttribute('aria-pressed', String(groupShieldArmed));
+          button.textContent = message.armed ? '🛡 Escudo activado' : '🛡 Activar escudo · 1 uso';
+        }
+        return;
+      }
+      if (message.type === 'standings') {
+        renderGroupPlayers(message.players, document.getElementById('groupGamePlayers'));
+        if (!groupLobbyScreen.hidden) renderGroupPlayers(message.players, document.getElementById('groupLobbyPlayers'));
+        return;
+      }
+      if (message.type === 'round_reveal') {
+        groupRoundRevealed = true;
+        const item = scenarios[message.questionIndex];
+        document.querySelectorAll('#groupOptionsContainer .option').forEach((button, index) => {
+          if (index === message.correctOption) button.classList.add('correct');
+        });
+        if (!groupAnswered) {
+          const feedback = document.getElementById('groupFeedbackBox');
+          feedback.className = 'feedback show good group-feedback';
+          document.getElementById('groupFeedbackTitle').textContent = 'Respuesta segura';
+          document.getElementById('groupFeedbackText').textContent = item.good;
+          document.getElementById('groupSimulationText').textContent = item.safe;
+          document.getElementById('groupSimulationText').className = 'simulation safe';
+        }
+        document.getElementById('groupGameStatus').textContent = `Respuesta correcta: ${String.fromCharCode(65 + message.correctOption)}. Preparando la siguiente pregunta...`;
+        return;
+      }
+      if (message.type === 'game_over') renderGroupResult(message.players);
+    }
+
+    function leaveGroup() {
+      clearInterval(groupTimerInterval);
+      if (groupSocket) {
+        if (groupSocket.readyState === WebSocket.OPEN) groupSocket.send(JSON.stringify({ type: 'leave' }));
+        const socket = groupSocket;
+        groupSocket = null;
+        socket.close();
+      }
+      groupPlayerId = '';
+      groupCode = '';
+      groupHost = false;
+      groupLobbyScreen.hidden = true;
+      groupGameScreen.hidden = true;
+      groupResultScreen.hidden = true;
+      welcomeScreen.hidden = false;
+      showGroupEntryError('');
+    }
+
+    const requestedRoom = new URLSearchParams(location.search).get('room');
+    if (requestedRoom && /^[A-HJ-NP-Z2-9]{6}$/i.test(requestedRoom)) {
+      document.getElementById('groupRoomCode').value = requestedRoom.toUpperCase();
+    }
+
     document.getElementById('startButton').addEventListener('click', startGame);
+    document.getElementById('createGroupButton').addEventListener('click', () => connectToGroup('create'));
+    document.getElementById('joinGroupButton').addEventListener('click', () => connectToGroup('join'));
+    document.getElementById('groupStartButton').addEventListener('click', () => sendGroupMessage({ type: 'start' }));
+    document.getElementById('leaveGroupButton').addEventListener('click', leaveGroup);
+    document.getElementById('groupReturnButton').addEventListener('click', leaveGroup);
+    document.getElementById('groupFiftyButton').addEventListener('click', () => {
+      if (!groupAnswered) sendGroupMessage({ type: 'lifeline', name: 'fifty' });
+    });
+    document.getElementById('groupShieldButton').addEventListener('click', () => {
+      if (!groupAnswered) sendGroupMessage({ type: 'lifeline', name: 'shield' });
+    });
     fiftyButton.addEventListener('click', useFiftyFifty);
     shieldButton.addEventListener('click', toggleShield);
     nextButton.addEventListener('click', advanceQuestion);
