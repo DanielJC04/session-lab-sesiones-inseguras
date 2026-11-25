@@ -1,7 +1,7 @@
 # Session Lab
 
 Minijuego educativo sobre secuestro de sesión web. Incluye diez preguntas con
-cuatro opciones (A-D), tres vidas, puntuación, temporizador de 15 segundos y
+cuatro opciones (A-D), tres vidas, puntuación, temporizador de 25 segundos y
 los comodines 50/50 y escudo (un uso por partida). El modo individual corre en
 el navegador; el modo grupal permite crear una sala remota con código para
 hasta ocho participantes y mantiene un marcador compartido en tiempo real.

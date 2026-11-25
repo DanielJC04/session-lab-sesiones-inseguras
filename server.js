@@ -14,7 +14,7 @@ const ROOM_TTL_MS = 30 * 60 * 1000;
 
 function createMultiplayerServer({
   allowedOrigins = [],
-  questionDurationMs = 15000,
+  questionDurationMs = 25000,
   feedbackDurationMs = 2500,
   now = Date.now,
   random = Math.random

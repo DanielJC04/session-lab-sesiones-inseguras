@@ -162,8 +162,8 @@
       <div class="welcome-grid">
         <div>
           <h2>¿Listo para ser experto en sesiones?</h2>
-          <p>Responde diez preguntas al estilo concurso y protege la sesión. Tienes 15 segundos por pregunta, tres vidas y dos comodines.</p>
-          <div class="facts"><span>10 niveles de premio</span><span>3 vidas</span><span>15 segundos por pregunta</span></div>
+          <p>Responde diez preguntas al estilo concurso y protege la sesión. Tienes 25 segundos por pregunta, tres vidas y dos comodines.</p>
+          <div class="facts"><span>10 niveles de premio</span><span>3 vidas</span><span>25 segundos por pregunta</span></div>
           <button class="primary" id="startButton">Jugar por el premio →</button>
           <div class="group-entry">
             <h3>¿Quieren jugar varias personas?</h3>
@@ -203,7 +203,7 @@
         <div class="status-group">
           <div class="score-chip" id="groupScoreLabel">Puntos: 0 / 20</div>
           <div class="lives" aria-label="Vidas restantes"><span class="hearts" id="groupHeartsDisplay">♥ ♥ ♥</span><span id="groupLivesCount">3</span></div>
-          <div class="timer" id="groupTimerDisplay" role="timer" aria-label="15 segundos restantes"><span aria-hidden="true">⏱</span><strong id="groupTimerCount">15</strong><span>s</span></div>
+          <div class="timer" id="groupTimerDisplay" role="timer" aria-label="25 segundos restantes"><span aria-hidden="true">⏱</span><strong id="groupTimerCount">25</strong><span>s</span></div>
         </div>
       </div>
       <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="groupTimerFill"></div></div>
@@ -240,7 +240,7 @@
         <div class="status-group">
           <div class="score-chip" id="scoreLabel">Puntos: 0 / 20</div>
           <div class="lives" id="livesDisplay" aria-label="Vidas restantes"><span class="hearts" id="heartsDisplay">♥ ♥ ♥</span><span id="livesCount">3</span></div>
-          <div class="timer" id="timerDisplay" role="timer" aria-label="15 segundos restantes"><span aria-hidden="true">⏱</span><strong id="timerCount">15</strong><span>s</span></div>
+          <div class="timer" id="timerDisplay" role="timer" aria-label="25 segundos restantes"><span aria-hidden="true">⏱</span><strong id="timerCount">25</strong><span>s</span></div>
         </div>
       </div>
       <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
@@ -445,10 +445,10 @@
     let shieldUsed = false;
     let shieldArmed = false;
     let answered = false;
-    let timeLeft = 15;
+    let timeLeft = 25;
     let timerInterval = null;
     let advanceTimeout = null;
-    const timerSeconds = 15;
+    const timerSeconds = 25;
     const feedbackDelay = 1600;
     const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP", "1.500 XP", "2.000 XP", "2.500 XP", "3.000 XP", "5.000 XP"];
     const multiplayerSocketUrl = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
@@ -877,7 +877,7 @@
       document.getElementById('groupTimerCount').textContent = seconds;
       document.getElementById('groupTimerDisplay').setAttribute('aria-label', `${seconds} segundos restantes`);
       document.getElementById('groupTimerDisplay').classList.toggle('urgent', seconds <= 5);
-      document.getElementById('groupTimerFill').style.width = `${Math.min(100, (remaining / 15000) * 100)}%`;
+      document.getElementById('groupTimerFill').style.width = `${Math.min(100, (remaining / (timerSeconds * 1000)) * 100)}%`;
       document.getElementById('groupTimerFill').classList.toggle('urgent', seconds <= 5);
     }
 
