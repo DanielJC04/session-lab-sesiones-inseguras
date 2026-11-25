@@ -271,7 +271,10 @@
       <p class="result-description" id="resultDescription"></p>
       <div class="result-list" id="resultList"></div>
       <div class="notice">Esta actividad es una simulación local. Los identificadores y eventos son ficticios: no se capturan cookies ni se intervienen sesiones reales.</div>
-      <div style="margin-top:22px"><button class="primary" id="restartButton">Volver a jugar ↻</button></div>
+      <div class="group-actions" style="margin-top:22px">
+        <button class="primary" id="restartButton">Volver a jugar ↻</button>
+        <button class="secondary" id="homeButton" type="button">Volver al inicio</button>
+      </div>
     </section>
 
     <footer>SESSION LAB · Práctica académica sobre gestión segura de sesiones</footer>
@@ -733,6 +736,14 @@
       });
     }
 
+    function returnToHome() {
+      stopTimer();
+      clearAdvanceTimeout();
+      gameScreen.hidden = true;
+      resultScreen.hidden = true;
+      welcomeScreen.hidden = false;
+    }
+
     function useFiftyFifty() {
       if (fiftyUsed || answered) return;
       fiftyUsed = true;
@@ -1119,6 +1130,7 @@
     shieldButton.addEventListener('click', toggleShield);
     nextButton.addEventListener('click', advanceQuestion);
     document.getElementById('restartButton').addEventListener('click', startGame);
+    document.getElementById('homeButton').addEventListener('click', returnToHome);
   </script>
 </body>
 </html>
