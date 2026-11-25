@@ -1,6 +1,6 @@
 # Session Lab
 
-Minijuego educativo sobre secuestro de sesión web. Incluye seis preguntas con
+Minijuego educativo sobre secuestro de sesión web. Incluye diez preguntas con
 cuatro opciones (A-D), tres vidas, puntuación, y los comodines 50/50 y escudo
 (un uso por partida). El 50/50 elimina dos opciones incorrectas y deja dos
 respuestas posibles. Cada pregunta tiene 15 segundos; si se acaba el tiempo,

@@ -146,8 +146,8 @@
       <div class="welcome-grid">
         <div>
           <h2>¿Listo para ser experto en sesiones?</h2>
-          <p>Responde seis preguntas al estilo concurso y protege la sesión. Tienes 15 segundos por pregunta, tres vidas y dos comodines.</p>
-          <div class="facts"><span>6 niveles de premio</span><span>3 vidas</span><span>15 segundos por pregunta</span></div>
+          <p>Responde diez preguntas al estilo concurso y protege la sesión. Tienes 15 segundos por pregunta, tres vidas y dos comodines.</p>
+          <div class="facts"><span>10 niveles de premio</span><span>3 vidas</span><span>15 segundos por pregunta</span></div>
           <button class="primary" id="startButton">Jugar por el premio →</button>
         </div>
         <div class="mission"><strong>TUS COMODINES</strong><span>El 50/50 deja dos respuestas posibles. Activa el escudo antes de responder: si fallas, no ganas puntos ni pierdes una vida, y pasas a la siguiente pregunta. El escudo se conserva si aciertas; el tiempo agotado siempre cuesta una vida.</span></div>
@@ -156,9 +156,9 @@
 
     <section class="panel game" id="gameScreen" hidden>
       <div class="game-top">
-        <div><div class="step" id="stepLabel">PREGUNTA 1 DE 6</div><div class="prize-label" id="prizeLabel">Premio: 100 XP</div></div>
+        <div><div class="step" id="stepLabel">PREGUNTA 1 DE 10</div><div class="prize-label" id="prizeLabel">Premio: 100 XP</div></div>
         <div class="status-group">
-          <div class="score-chip" id="scoreLabel">Puntos: 0 / 12</div>
+          <div class="score-chip" id="scoreLabel">Puntos: 0 / 20</div>
           <div class="lives" id="livesDisplay" aria-label="Vidas restantes"><span class="hearts" id="heartsDisplay">♥ ♥ ♥</span><span id="livesCount">3</span></div>
           <div class="timer" id="timerDisplay" role="timer" aria-label="15 segundos restantes"><span aria-hidden="true">⏱</span><strong id="timerCount">15</strong><span>s</span></div>
         </div>
@@ -166,7 +166,7 @@
       <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
       <div class="track"><div class="track-fill" id="progressFill"></div></div>
       <div class="prize-ladder" id="prizeLadder" aria-label="Escalera de niveles">
-        <span class="prize-step">1 · 100 XP</span><span class="prize-step">2 · 250 XP</span><span class="prize-step">3 · 500 XP</span><span class="prize-step">4 · 750 XP</span><span class="prize-step">5 · 1.000 XP</span><span class="prize-step">6 · 1.500 XP</span>
+        <span class="prize-step">1 · 100 XP</span><span class="prize-step">2 · 250 XP</span><span class="prize-step">3 · 500 XP</span><span class="prize-step">4 · 750 XP</span><span class="prize-step">5 · 1.000 XP</span><span class="prize-step">6 · 1.500 XP</span><span class="prize-step">7 · 2.000 XP</span><span class="prize-step">8 · 2.500 XP</span><span class="prize-step">9 · 3.000 XP</span><span class="prize-step">10 · 5.000 XP</span>
       </div>
       <div class="game-tools" aria-label="Comodines disponibles">
         <button class="secondary" id="fiftyButton" type="button">½ 50/50 <span id="fiftyStatus">· 1 uso</span></button>
@@ -187,7 +187,7 @@
     <section class="panel result" id="resultScreen" hidden>
       <div class="eyebrow">Informe de la misión</div>
       <h2 id="resultTitle">Resultado</h2>
-      <div class="result-score" id="finalScore">0 <span>/ 12 puntos</span></div>
+      <div class="result-score" id="finalScore">0 <span>/ 20 puntos</span></div>
       <p class="result-description" id="resultDescription"></p>
       <div class="result-list" id="resultList"></div>
       <div class="notice">Esta actividad es una simulación local. Los identificadores y eventos son ficticios: no se capturan cookies ni se intervienen sesiones reales.</div>
@@ -294,6 +294,70 @@
         bad: "Si el identificador anterior sigue vigente tras un cambio de privilegios, quien ya lo conocía podría intentar reutilizarlo.",
         attack: "SIMULACIÓN: un identificador previo conserva acceso después de que la cuenta obtuvo más privilegios.",
         safe: "DEFENSA: se genera un identificador nuevo y se invalida el anterior."
+      },
+      {
+        label: "Generación del identificador",
+        question: "¿Qué característica hace más difícil adivinar un identificador de sesión?",
+        context: "El servidor crea un identificador nuevo para una sesión autenticada. Debe ser seguro aunque alguien conozca otros identificadores.",
+        options: [
+          "Que los identificadores sean consecutivos para facilitar el soporte.",
+          "Que se generen con aleatoriedad criptográfica y suficiente longitud.",
+          "Que incluyan el nombre de usuario y la fecha para reconocerlos.",
+          "Que todas las sesiones de una cuenta reutilicen el mismo identificador."
+        ],
+        correct: 1,
+        good: "Correcto. Los identificadores impredecibles y con suficiente entropía reducen la posibilidad de adivinarlos o fabricarlos.",
+        bad: "Los valores consecutivos, basados en datos conocidos o reutilizados pueden ser predecibles y facilitar la suplantación de una sesión.",
+        attack: "SIMULACIÓN: un identificador predecible puede permitir que otra persona intente adivinar o fabricar una sesión válida.",
+        safe: "DEFENSA: cada sesión recibe un identificador generado con aleatoriedad criptográfica y suficiente entropía."
+      },
+      {
+        label: "Solicitudes entre sitios (CSRF)",
+        question: "¿Qué ayuda a evitar que otro sitio envíe acciones usando la sesión activa de la víctima?",
+        context: "El navegador envía cookies automáticamente. Una página maliciosa intenta hacer que la víctima envíe una solicitud autenticada.",
+        options: [
+          "Confiar solo en HTTPS, porque cifra todas las solicitudes.",
+          "Validar tokens anti-CSRF y el origen de la solicitud; usar SameSite como defensa adicional.",
+          "Poner el identificador de sesión en la dirección URL.",
+          "Aceptar cualquier solicitud POST que incluya una cookie válida."
+        ],
+        correct: 1,
+        good: "Correcto. Los tokens anti-CSRF y la validación del origen ayudan a comprobar que la acción fue iniciada desde el sitio esperado; SameSite añade defensa en profundidad.",
+        bad: "HTTPS protege el transporte, pero no demuestra que la persona quiso iniciar la acción. Valida tokens anti-CSRF y el origen; no confíes solo en la cookie.",
+        attack: "SIMULACIÓN: el navegador adjunta la cookie a una solicitud no deseada y el servidor no comprueba su origen.",
+        safe: "DEFENSA: el servidor valida el token anti-CSRF y aplica controles de origen junto con SameSite."
+      },
+      {
+        label: "Revocación tras una filtración",
+        question: "¿Qué debería hacer el equipo si sospecha que un identificador de sesión se filtró?",
+        context: "Una alerta indica que un identificador pudo quedar expuesto fuera de la aplicación.",
+        options: [
+          "Cambiar la apariencia de la cookie, pero seguir aceptando el identificador anterior.",
+          "Esperar a que la sesión expire por sí sola.",
+          "Revocar la sesión en el servidor y pedir al usuario que se autentique de nuevo.",
+          "Borrar el identificador solo del navegador del usuario afectado."
+        ],
+        correct: 2,
+        good: "Correcto. Al invalidar la sesión en el servidor, el identificador filtrado deja de servir; después se puede iniciar una sesión nueva de forma segura.",
+        bad: "Mientras el servidor acepte el identificador filtrado, podría seguir utilizándose. Revoca la sesión desde el servidor y solicita una nueva autenticación.",
+        attack: "SIMULACIÓN: el identificador filtrado sigue activo y puede ser reutilizado desde otro navegador.",
+        safe: "DEFENSA: la sesión sospechosa queda revocada en el servidor y se emite un identificador nuevo tras autenticar."
+      },
+      {
+        label: "Protección de registros",
+        question: "¿Cómo se reduce la exposición de identificadores en registros y herramientas de analítica?",
+        context: "El equipo revisa registros de solicitudes para diagnosticar errores sin almacenar credenciales de sesión.",
+        options: [
+          "Guardar el valor completo de cada cookie para facilitar la depuración.",
+          "Añadir el identificador de sesión a las URLs y eventos de analítica.",
+          "Redactar identificadores y evitar registrar cookies o cabeceras de autenticación completas.",
+          "Compartir los identificadores en mensajes de error para correlacionar solicitudes."
+        ],
+        correct: 2,
+        good: "Correcto. Redactar los identificadores y limitar la captura de cookies y cabeceras reduce la posibilidad de que un registro se convierta en una fuente de robo de sesiones.",
+        bad: "Los registros y las herramientas de analítica pueden copiarse, consultarse o conservarse. No guardes identificadores completos ni credenciales de sesión.",
+        attack: "SIMULACIÓN: un identificador aparece en un registro o evento accesible para más personas de las necesarias.",
+        safe: "DEFENSA: los identificadores se redactan y los registros guardan solo los datos mínimos necesarios."
       }
     ];
 
@@ -312,7 +376,7 @@
     let advanceTimeout = null;
     const timerSeconds = 15;
     const feedbackDelay = 1600;
-    const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP", "1.500 XP"];
+    const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP", "1.500 XP", "2.000 XP", "2.500 XP", "3.000 XP", "5.000 XP"];
 
     function createQuestionOrder() {
       const order = scenarios.map((_, index) => index);
@@ -546,10 +610,10 @@
       if (lives === 0) {
         title = 'Fin de la partida';
         description = 'Te quedaste sin vidas, pero cada respuesta te enseñó una defensa. Repasa los escenarios y vuelve a intentarlo.';
-      } else if (score >= 10) {
+      } else if (score >= 16) {
         title = '¡Misión protegida!';
-        description = `¡Excelente! Superaste las seis preguntas con ${lives} ${lives === 1 ? 'vida restante' : 'vidas restantes'} y protegiste la sesión con buenas decisiones.`;
-      } else if (score >= 6) {
+        description = `¡Excelente! Superaste las diez preguntas con ${lives} ${lives === 1 ? 'vida restante' : 'vidas restantes'} y protegiste la sesión con buenas decisiones.`;
+      } else if (score >= 8) {
         title = 'Protección parcial';
         description = `Aplicaste algunas medidas correctas y terminaste con ${lives} ${lives === 1 ? 'vida' : 'vidas'}. Repasa las decisiones marcadas como riesgo para fortalecer la sesión.`;
       } else {
