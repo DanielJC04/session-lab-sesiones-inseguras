@@ -298,6 +298,8 @@
     ];
 
     let current = 0;
+    let questionOrder = [];
+    let previousQuestionOrder = [];
     let score = 0;
     let answers = [];
     let lives = 3;
@@ -311,6 +313,18 @@
     const timerSeconds = 15;
     const feedbackDelay = 1600;
     const prizes = ["100 XP", "250 XP", "500 XP", "750 XP", "1.000 XP", "1.500 XP"];
+
+    function createQuestionOrder() {
+      const order = scenarios.map((_, index) => index);
+      for (let index = order.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [order[index], order[swapIndex]] = [order[swapIndex], order[index]];
+      }
+      if (order.length > 1 && order.every((scenarioIndex, index) => scenarioIndex === previousQuestionOrder[index])) {
+        [order[0], order[1]] = [order[1], order[0]];
+      }
+      return order;
+    }
 
     const welcomeScreen = document.getElementById('welcomeScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -379,6 +393,8 @@
       stopTimer();
       clearAdvanceTimeout();
       current = 0;
+      questionOrder = createQuestionOrder();
+      previousQuestionOrder = questionOrder.slice();
       score = 0;
       answers = [];
       lives = 3;
@@ -395,7 +411,7 @@
     function renderScenario() {
       stopTimer();
       clearAdvanceTimeout();
-      const item = scenarios[current];
+      const item = scenarios[questionOrder[current]];
       answered = false;
       shieldArmed = false;
       document.getElementById('stepLabel').textContent = `PREGUNTA ${current + 1} DE ${scenarios.length}`;
@@ -431,7 +447,7 @@
       if (answered) return;
       stopTimer();
       answered = true;
-      const item = scenarios[current];
+      const item = scenarios[questionOrder[current]];
       const correct = selected === item.correct;
       const shieldSaved = !correct && shieldArmed && !shieldUsed;
       if (correct) {
@@ -479,7 +495,7 @@
       answered = true;
       shieldArmed = false;
       lives -= 1;
-      const item = scenarios[current];
+      const item = scenarios[questionOrder[current]];
       answers.push({ selected: null, correct: false, label: item.label, timeout: true });
 
       Array.from(optionsContainer.children).forEach((button, index) => {
@@ -567,7 +583,7 @@
     function useFiftyFifty() {
       if (fiftyUsed || answered) return;
       fiftyUsed = true;
-      const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== scenarios[current].correct);
+      const wrongButtons = Array.from(optionsContainer.children).filter((button, index) => index !== scenarios[questionOrder[current]].correct);
       wrongButtons.slice(0, 2).forEach(button => {
         button.hidden = true;
         button.setAttribute('aria-hidden', 'true');
