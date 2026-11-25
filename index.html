@@ -223,6 +223,7 @@
       </div>
       <div class="group-standings"><h3>Marcador de la sala</h3><ul class="group-players" id="groupGamePlayers"></ul></div>
       <p class="group-status" id="groupGameStatus" aria-live="polite">Responde antes de que termine el tiempo.</p>
+      <div class="group-actions"><button class="secondary" id="groupLeaveGameButton" type="button">Salir de la partida</button></div>
     </section>
 
     <section class="panel result" id="groupResultScreen" hidden>
@@ -1106,6 +1107,7 @@
     document.getElementById('joinGroupButton').addEventListener('click', () => connectToGroup('join'));
     document.getElementById('groupStartButton').addEventListener('click', () => sendGroupMessage({ type: 'start' }));
     document.getElementById('leaveGroupButton').addEventListener('click', leaveGroup);
+    document.getElementById('groupLeaveGameButton').addEventListener('click', leaveGroup);
     document.getElementById('groupReturnButton').addEventListener('click', leaveGroup);
     document.getElementById('groupFiftyButton').addEventListener('click', () => {
       if (!groupAnswered) sendGroupMessage({ type: 'lifeline', name: 'fifty' });
